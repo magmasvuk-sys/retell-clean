@@ -15,7 +15,14 @@ export default function Home() {
       const res = await fetch("/api/start-call", { method: "POST" });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      if (!res.ok) {
+  throw new Error(
+    data.error ||
+    data.message ||
+    data.detail ||
+    JSON.stringify(data)
+  );
+}
 
       const client = new RetellWebClient();
 
