@@ -1,5 +1,23 @@
 export async function POST() {
   try {
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events`, {
+      method: "POST",
+      headers: {
+        apikey: process.env.SUPABASE_SECRET_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        user_id: 1,
+        event_type: "simulation_started",
+        path_name: "Customer Service",
+        content_name: "Angry Customer Simulation",
+        status: "started",
+        notes: "Started from retell-clean web simulation"
+      })
+    });
+
     const response = await fetch("https://api.retellai.com/v2/create-web-call", {
       method: "POST",
       headers: {
@@ -23,7 +41,10 @@ export async function POST() {
     });
   } catch (error) {
     return Response.json(
-      { error: "Failed to create web call" },
+      {
+        error: "Failed to create web call",
+        detail: String(error),
+      },
       { status: 500 }
     );
   }
