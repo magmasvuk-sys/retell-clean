@@ -1,32 +1,43 @@
 export async function POST(request) {
   try {
     const event = await request.json().catch(() => ({}));
+
+    const eventType =
+      event?.event === "simulation_completed"
+        ? "simulation_completed"
+        : "simulation_started";
+
+    const status =
+      event?.event === "simulation_completed"
+        ? "completed"
+        : "started";
+
+    const notes =
+      event?.event === "simulation_completed"
+        ? "Completed from retell-clean web simulation"
+        : "Started from retell-clean web simulation";
+
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events`, {
       method: "POST",
       headers: {
         apikey: process.env.SUPABASE_SECRET_KEY,
         Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal"
+        Prefer: "return=minimal",
       },
       body: JSON.stringify({
         user_id: 1,
-event_type:
-  event?.event === "simulation_completed"
-    ? "simulation_completed"
-    : "simulation_started",
-path_name: "Customer Service",
-content_name: "Angry Customer Simulation",
-status:
-  event?.event === "simulation_completed"
-    ? "completed"
-    : "started",
-notes:
-  event?.event === "simulation_completed"
-    ? "Completed from retell-clean web simulation"
-    : "Started from retell-clean web simulation"
-      })
+        event_type: eventType,
+        path_name: "Customer Service",
+        content_name: "Angry Customer Simulation",
+        status: status,
+        notes: notes,
+      }),
     });
+
+    if (event?.event === "simulation_completed") {
+      return Response.json({ success: true });
+    }
 
     const response = await fetch("https://api.retellai.com/v2/create-web-call", {
       method: "POST",
@@ -52,7 +63,7 @@ notes:
   } catch (error) {
     return Response.json(
       {
-        error: "Failed to create web call",
+        error: "Failed to process simulation event",
         detail: String(error),
       },
       { status: 500 }
