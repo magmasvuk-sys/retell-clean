@@ -1,5 +1,6 @@
-export async function POST() {
+export async function POST(request) {
   try {
+    const event = await request.json().catch(() => ({}));
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events`, {
       method: "POST",
       headers: {
