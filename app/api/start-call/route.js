@@ -10,11 +10,20 @@ export async function POST() {
       },
       body: JSON.stringify({
         user_id: 1,
-        event_type: "simulation_started",
-        path_name: "Customer Service",
-        content_name: "Angry Customer Simulation",
-        status: "started",
-        notes: "Started from retell-clean web simulation"
+event_type:
+  event?.event === "simulation_completed"
+    ? "simulation_completed"
+    : "simulation_started",
+path_name: "Customer Service",
+content_name: "Angry Customer Simulation",
+status:
+  event?.event === "simulation_completed"
+    ? "completed"
+    : "started",
+notes:
+  event?.event === "simulation_completed"
+    ? "Completed from retell-clean web simulation"
+    : "Started from retell-clean web simulation"
       })
     });
 
