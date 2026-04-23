@@ -1,18 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RetellWebClient } from "retell-client-js-sdk";
 
 export default function Home() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
 
+useEffect(() => {
+  let storedUserId = localStorage.getItem("user_id");
+
+  if (!storedUserId) {
+    storedUserId = Date.now().toString();
+    localStorage.setItem("user_id", storedUserId);
+  }
+
+  setUserId(storedUserId);
+}, []);
   async function startCall() {
     setLoading(true);
     setStatus("Starting call...");
 
     try {
-      const res = await fetch("/api/start-call", { method: "POST" });
+    const res = await fetch("/api/start-call", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    user_id: userId,
+  }),
+});
       const data = await res.json();
 
       if (!res.ok) {
@@ -41,8 +60,9 @@ export default function Home() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              event: "simulation_completed",
-            }),
+  event: "simulation_completed",
+  user_id: userId,
+}),
           });
         } catch (err) {
           console.error("Failed to log completion:", err);
