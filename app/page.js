@@ -16,13 +16,13 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-  throw new Error(
-    data.error ||
-    data.message ||
-    data.detail ||
-    JSON.stringify(data)
-  );
-}
+        throw new Error(
+          data.error ||
+          data.message ||
+          data.detail ||
+          JSON.stringify(data)
+        );
+      }
 
       const client = new RetellWebClient();
 
@@ -31,52 +31,24 @@ export default function Home() {
       });
 
       client.on("call_ended", async () => {
-  setStatus("Call ended.");
-  setLoading(false);
+        setStatus("Call ended.");
+        setLoading(false);
 
-  try {
-    await fetch("/api/start-call", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        event: "simulation_completed"
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to log completion:", err);
-  }
-});
-  try {
-    await fetch("/api/start-call", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        event: "simulation_completed"
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to log completion:", err);
-  }
-});
+        try {
+          await fetch("/api/start-call", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              event: "simulation_completed",
+            }),
+          });
+        } catch (err) {
+          console.error("Failed to log completion:", err);
+        }
+      });
 
-  try {
-    await fetch("/api/start-call", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        event: "simulation_completed"
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to log completion:", err);
-  }
-});
       client.on("error", (err) => {
         setStatus("Error: " + err.message);
         setLoading(false);
