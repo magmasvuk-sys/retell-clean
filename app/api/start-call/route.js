@@ -26,7 +26,7 @@ export async function POST(request) {
         Prefer: "return=minimal",
       },
       body: JSON.stringify({
-        user_id: 1,
+     user_id: event?.user_id || 1,
         event_type: eventType,
         path_name: "Customer Service",
         content_name: "Angry Customer Simulation",
