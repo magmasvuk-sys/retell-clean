@@ -30,11 +30,24 @@ export default function Home() {
         setStatus("Call started! Allow mic if prompted.");
       });
 
-      client.on("call_ended", () => {
-        setStatus("Call ended.");
-        setLoading(false);
-      });
+      client.on("call_ended", async () => {
+  setStatus("Call ended.");
+  setLoading(false);
 
+  try {
+    await fetch("/api/start-call", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "simulation_completed"
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to log completion:", err);
+  }
+});
       client.on("error", (err) => {
         setStatus("Error: " + err.message);
         setLoading(false);
