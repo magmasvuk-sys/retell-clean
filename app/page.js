@@ -48,6 +48,20 @@ export default function Home() {
     console.error("Failed to log completion:", err);
   }
 });
+  try {
+    await fetch("/api/start-call", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "simulation_completed"
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to log completion:", err);
+  }
+});
 
   try {
     await fetch("/api/start-call", {
