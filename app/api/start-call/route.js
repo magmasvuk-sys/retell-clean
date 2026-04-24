@@ -3,20 +3,15 @@ export async function POST(request) {
     const event = await request.json().catch(() => ({}));
 
     const eventType =
-      event?.event === "simulation_completed"
-        ? "simulation_completed"
-        : "simulation_started";
+  event?.event || "simulation_started";
 
     const status =
-      event?.event === "simulation_completed"
-        ? "completed"
-        : "started";
+  event?.status || (event?.event?.includes("completed") ? "completed" : "started");
 
     const notes =
-      event?.event === "simulation_completed"
-        ? "Completed from retell-clean web simulation"
-        : "Started from retell-clean web simulation";
-
+  event?.status === "completed"
+    ? "Completed from retell-clean web simulation"
+    : "Started from retell-clean web simulation";
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events`, {
       method: "POST",
       headers: {
