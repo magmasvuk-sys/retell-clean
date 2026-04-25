@@ -1,25 +1,53 @@
-export default async function AdminPage() {
-  const usersRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/users?select=*&order=created_at.desc`, {
-    headers: {
-      apikey: process.env.SUPABASE_SECRET_KEY,
-      Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-    },
-    cache: "no-store",
-  });
+import { cookies } from "next/headers";
 
-  const eventsRes = await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events?select=*&order=created_at.desc`, {
-    headers: {
-      apikey: process.env.SUPABASE_SECRET_KEY,
-      Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-    },
-    cache: "no-store",
-  });
+export default async function AdminPage() {
+  const cookieStore = cookies();
+  const password = cookieStore.get("admin_password")?.value;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return (
+      <main style={{ textAlign: "center", marginTop: 100 }}>
+        <h2>Admin Access</h2>
+        <form method="POST" action="/api/admin-login">
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter password"
+            style={{ padding: 10, marginRight: 10 }}
+          />
+          <button type="submit">Enter</button>
+        </form>
+      </main>
+    );
+  }
+
+  const usersRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/users?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: process.env.SUPABASE_SECRET_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+      },
+      cache: "no-store",
+    }
+  );
+
+  const eventsRes = await fetch(
+    `${process.env.SUPABASE_URL}/rest/v1/user_events?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: process.env.SUPABASE_SECRET_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+      },
+      cache: "no-store",
+    }
+  );
 
   const users = await usersRes.json();
   const events = await eventsRes.json();
 
   return (
-    <main style={{ padding: 30, fontFamily: "Arial, sans-serif" }}>
+    <main style={{ padding: 30 }}>
       <h1>MagMasV Admin Dashboard</h1>
 
       <h2>Summary</h2>
