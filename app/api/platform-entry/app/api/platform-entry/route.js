@@ -2,23 +2,49 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    const userResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/users`, {
-      method: "POST",
-      headers: {
-        apikey: process.env.SUPABASE_SECRET_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify({
-        full_name: body.full_name,
-        email: body.email,
-        source: "MagMasV Notion Entry",
-      }),
-    });
+    const email = body.email?.trim().toLowerCase();
+    const fullName = body.full_name?.trim();
 
-    const userData = await userResponse.json();
-    const user = userData[0];
+    if (!email || !fullName) {
+      return Response.json(
+        { error: "Full name and email are required" },
+        { status: 400 }
+      );
+    }
+
+    const existingUserResponse = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=*`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SECRET_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+        },
+      }
+    );
+
+    const existingUsers = await existingUserResponse.json();
+
+    let user = existingUsers[0];
+
+    if (!user) {
+      const createUserResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/users`, {
+        method: "POST",
+        headers: {
+          apikey: process.env.SUPABASE_SECRET_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email,
+          source: "MagMasV Notion Entry",
+        }),
+      });
+
+      const createdUsers = await createUserResponse.json();
+      user = createdUsers[0];
+    }
 
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/user_events`, {
       method: "POST",
@@ -41,7 +67,10 @@ export async function POST(request) {
     return Response.json({ success: true, user_id: user.id });
   } catch (error) {
     return Response.json(
-      { error: "Failed to register platform entry", detail: String(error) },
+      {
+        error: "Failed to register platform entry",
+        detail: String(error),
+      },
       { status: 500 }
     );
   }
