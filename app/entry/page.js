@@ -1,14 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function EntryPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const notionLink =
     "https://www.notion.so/End-to-End-Processes_MagMas-V-32e0081441a0802ca4f0de39def3c4cf?source=copy_link";
+
+  useEffect(() => {
+    const existingUser = localStorage.getItem("user_data");
+
+    if (existingUser) {
+      const user = JSON.parse(existingUser);
+
+      // log returning access
+      fetch("/api/platform-entry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: user.full_name,
+          email: user.email,
+        }),
+      });
+
+      // redirect immediately
+      window.location.href = notionLink;
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   async function enterPlatform() {
     if (!fullName || !email) {
@@ -17,6 +43,15 @@ export default function EntryPage() {
     }
 
     setStatus("Entering platform...");
+
+    // save locally
+    localStorage.setItem(
+      "user_data",
+      JSON.stringify({
+        full_name: fullName,
+        email: email,
+      })
+    );
 
     const res = await fetch("/api/platform-entry", {
       method: "POST",
@@ -30,11 +65,15 @@ export default function EntryPage() {
     });
 
     if (!res.ok) {
-      setStatus("Something went wrong. Please try again.");
+      setStatus("Something went wrong.");
       return;
     }
 
     window.location.href = notionLink;
+  }
+
+  if (loading) {
+    return <p style={{ textAlign: "center", marginTop: 100 }}>Loading...</p>;
   }
 
   return (
