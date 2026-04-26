@@ -20,14 +20,15 @@ export async function POST(request) {
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
-      body: JSON.stringify({
-     user_id: event?.user_id || 1,
-        event_type: eventType,
-        path_name: "Customer Service",
-        content_name: "Angry Customer Simulation",
-        status: status,
-        notes: notes,
-      }),
+     body: JSON.stringify({
+  user_id: event?.user_id || 1,
+  event_type: eventType,
+  path_name: "Customer Service",
+  content_name: "Angry Customer Simulation",
+  status: status,
+  notes: notes,
+  duration_seconds: event?.duration_seconds || null,
+}),
     });
 
     if (event?.event === "simulation_completed") {
