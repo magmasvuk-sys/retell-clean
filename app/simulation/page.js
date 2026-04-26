@@ -6,6 +6,7 @@ import { RetellWebClient } from "retell-client-js-sdk";
 export default function SimulationPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [startTime, setStartTime] = useState(null);
 
   async function startCall() {
     setLoading(true);
@@ -25,11 +26,17 @@ export default function SimulationPage() {
       const client = new RetellWebClient();
 
       client.on("call_started", () => {
+        setStartTime(Date.now());
         setStatus("Call started! Speak now.");
       });
 
       client.on("call_ended", () => {
-        setStatus("Simulation ended.");
+        const endTime = Date.now();
+        const duration = startTime
+          ? Math.floor((endTime - startTime) / 1000)
+          : 0;
+
+        setStatus(`Simulation ended. Duration: ${duration} seconds`);
         setLoading(false);
       });
 
