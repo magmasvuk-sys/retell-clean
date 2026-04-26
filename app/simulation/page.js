@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { RetellWebClient } from "retell-client-js-sdk";
 
 export default function SimulationPage() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const [startTime, setStartTime] = useState(null);
+  const startTimeRef = useRef(null);
 
   async function startCall() {
     setLoading(true);
@@ -26,34 +26,32 @@ export default function SimulationPage() {
       const client = new RetellWebClient();
 
       client.on("call_started", () => {
-        setStartTime(Date.now());
+        startTimeRef.current = Date.now();
         setStatus("Call started! Speak now.");
       });
 
-     client.on("call_ended", async () => {
-  const endTime = Date.now();
-  const duration = startTime
-    ? Math.floor((endTime - startTime) / 1000)
-    : 0;
+      client.on("call_ended", async () => {
+        const endTime = Date.now();
 
-  setStatus(`Simulation ended. Duration: ${duration} seconds`);
-  setLoading(false);
+        const duration = startTimeRef.current
+          ? Math.floor((endTime - startTimeRef.current) / 1000)
+          : 0;
 
-  try {
-    await fetch("/api/start-call", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        event: "simulation_completed",
-        duration_seconds: duration,
-      }),
-    });
-  } catch (err) {
-    console.error("Failed to log duration:", err);
-  }
-});
+        setStatus(`Simulation ended. Duration: ${duration} seconds`);
+        setLoading(false);
+
+        await fetch("/api/start-call", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            event: "simulation_completed",
+            status: "completed",
+            duration_seconds: duration,
+          }),
+        });
+      });
 
       client.on("error", (err) => {
         setStatus("Error: " + err.message);
