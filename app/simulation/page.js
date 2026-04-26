@@ -30,15 +30,30 @@ export default function SimulationPage() {
         setStatus("Call started! Speak now.");
       });
 
-      client.on("call_ended", () => {
-        const endTime = Date.now();
-        const duration = startTime
-          ? Math.floor((endTime - startTime) / 1000)
-          : 0;
+     client.on("call_ended", async () => {
+  const endTime = Date.now();
+  const duration = startTime
+    ? Math.floor((endTime - startTime) / 1000)
+    : 0;
 
-        setStatus(`Simulation ended. Duration: ${duration} seconds`);
-        setLoading(false);
-      });
+  setStatus(`Simulation ended. Duration: ${duration} seconds`);
+  setLoading(false);
+
+  try {
+    await fetch("/api/start-call", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event: "simulation_completed",
+        duration_seconds: duration,
+      }),
+    });
+  } catch (err) {
+    console.error("Failed to log duration:", err);
+  }
+});
 
       client.on("error", (err) => {
         setStatus("Error: " + err.message);
