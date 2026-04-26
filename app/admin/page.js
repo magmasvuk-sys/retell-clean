@@ -85,6 +85,7 @@ export default async function AdminPage() {
             <th>Path</th>
             <th>Content</th>
             <th>Status</th>
+            <th>Duration (sec)</th>
             <th>Time</th>
           </tr>
         </thead>
@@ -96,6 +97,7 @@ export default async function AdminPage() {
               <td>{event.path_name}</td>
               <td>{event.content_name}</td>
               <td>{event.status}</td>
+              <td>{event.duration_seconds ?? "-"}</td>
               <td>{event.created_at}</td>
             </tr>
           ))}
